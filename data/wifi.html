@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Configuración Wi-Fi</title>
+  <link rel="stylesheet" href="sidebar.css">
+</head>
+<body>
+<aside class="sidebar">
+    <div class="sidebar-header">
+        <div class="sidebar-element-logo">
+            <img class="sidebar-icon sidebar-user sidebar-icon-logo" src="logo.png">
+        </div>
+    </div>
+    <div class="sidebar-container">
+        <ul class="sidebar-list">
+            <li class="sidebar-element menu-item-dropdown">
+                <a class="sidebar-link">
+                    <img class="sidebar-icon" src="wifi.svg">
+
+                    <span class="sidebar-text">Wi-Fi</span>
+                </a>
+            </li>
+            <li class="sidebar-element">
+                <a href="sidebar.html" class="sidebar-link">
+                    <img class="sidebar-icon" src="control.svg">
+                    <span class="sidebar-text">Controles</span>
+                </a>
+            </li>
+            <li class="sidebar-element">
+                <a class="sidebar-link">
+                    <img class="sidebar-icon" src="refresh.svg">
+                    <span class="sidebar-text">Reiniciar</span>
+                </a>
+            </li>
+
+        </ul>
+    </div>
+    <div class="sidebar-footer">
+        <div class="sidebar-element sidebar-element-user">
+            <img class="sidebar-icon" src="settings.svg">
+            <div class="sidebar-hide">
+                <h4 class="sidebar-text">Configuración</h4>
+                <span class="sidebar-text sidebar-text-info" id="estado">BioBot: Desconectado</span>
+            </div>
+    </div>
+</aside>
+<div class="principal-container">
+ <form class="formulario">
+    <h2>Configuración Wi-Fi</h2>
+
+    <label for="ssid">SSID</label>
+    <input type="text" id="ssid" name="ssid" required>
+
+    <label for="password">Contraseña</label>
+    <input type="password" id="password" name="password" required>
+
+    <button type="submit">Guardar</button>
+  </form>
+</div>
+</body>
+</html>
