@@ -274,6 +274,7 @@ body
 
 .figures-panel h3
 {
+
     text-align: center;
     color: #2d3748;
     margin-bottom: 20px;
@@ -402,6 +403,46 @@ body
     background: #cb6ce6;
 }
 
+.flecha
+{
+    transform-origin: left;
+    width: 0;
+    height: 2px;
+    background-color: black;
+    position: relative;
+    z-index: 5;
+}
+
+.flecha::after {
+  content: "";
+  position: absolute;
+  right: -6px;
+  top: -4px;
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 10px solid black; /* Cabeza de flecha */
+}
+
+.nodo
+{
+    width: 15px;
+    height: 15px;
+    background-color: #fff;
+    border-radius: 50%;
+    position: absolute;
+    cursor: pointer;
+    z-index: 30;
+    visibility: hidden;
+    pointer-events: auto;
+}
+.nodo:hover
+{
+    background-color: #8B3DFF;
+    box-shadow: 0 0 10px rgba(240, 128, 128, 0.5);
+}
+
 .principal-container
 {
     display: flex;
@@ -521,6 +562,8 @@ body
         }
 
         .canvas-container {
+            height: 100%;
+            width: 100%;
             position: relative;
             border: 2px solid #e2e8f0;
             border-radius: 15px;
@@ -531,7 +574,7 @@ body
 
         #canvas {
             width: 100%;
-            height: auto;
+            height: 100%;
             display: block;
             cursor: crosshair;
         }
@@ -539,19 +582,24 @@ body
         .placed-figure {
             position: absolute;
             cursor: move;
-            transition: all 0.2s ease;
-            z-index: 10;
+            z-index: 15;
             filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
         }
 
         .placed-figure:hover {
-            transform: scale(1.1);
+            border: #8B3DFF 2px solid;
             z-index: 20;
             filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.3));
         }
 
-        .placed-figure.dragging {
-            transform: scale(1.2);
+        .placed-figure-selected {
+            border: #8B3DFF 2px solid;
+            z-index: 20;
+            filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.3));
+        }
+
+        .placed-figure.dragging
+        {
             z-index: 30;
             filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.4));
         }

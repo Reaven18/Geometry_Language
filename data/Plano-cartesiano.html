@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html>
+    <head>
     <meta charset="UTF-8">
-    <title>SideBar</title>
-    <link rel="stylesheet" href="sidebar.css"/>
+    <link rel="stylesheet" href="sidebar.css">
+    <title>Plano cartesiano</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito&display=swap">
 </head>
 <body>
-<aside class="sidebar">
+    <aside class="sidebar">
     <div class="sidebar-header">
         <div class="sidebar-element-logo">
             <img class="sidebar-icon sidebar-user sidebar-icon-logo" src="logo.png">
@@ -91,6 +92,7 @@
                 <button onclick="clearFigures()">🗑️ Limpiar</button>
             </div>
         </div>
+
         <div class="canvas-container">
             <canvas id="canvas" ></canvas>
             <div class="info-panel" id="info">
@@ -99,7 +101,23 @@
                 Zoom: 100%
             </div>
         </div>
-        <script src="figuras.js"></script>
+        <script>
+            const lienzo = document.getElementById('canvas');
+            const contexto = lienzo.getContext('2d');
+
+            contexto.strokeStyle = "black";
+            contexto.lineWidth = 1;
+            for(let y=0 ; y <= 300; y += 20)
+            {
+                contexto.beginPath();
+                contexto.moveTo(0,y);
+                contexto.lineTo(400,y);
+                contexto.stroke();
+            }
+
+
+
+        </script>
 </div>
 </body>
 </html>
