@@ -279,6 +279,7 @@ placeFigure(shapeType, x, y, apuntadorA = null)
         y: y,
         x2: null,
         y2: null,
+        flechas: [],
         apuntadorE: null,
         apuntadorA,
         width,
@@ -306,7 +307,7 @@ crearNodos(figureData)
             nodo.className = 'nodo';
             figureData.element.appendChild(nodo);
             this.posicionarNodo(nodo,i,(figureData.width*this.zoom), (figureData.height*this.zoom));
-            nodo.addEventListener('mousedown', (e) => this.clickNodo(figureData,i, e));
+            nodo.addEventListener('mousedown', (e) => this.clickNodo(figureData,i));
             nodos.push(nodo);
         }
     figureData.nodos = nodos;
@@ -315,12 +316,10 @@ crearNodos(figureData)
 crearFlecha(figureData, i)
 {
     const rect = figureData.nodos[i].getBoundingClientRect();
-    console.log("X:"+rect.x);
     const coordenadas = this.calcularCoordenadas(figureData.nodos[i]);
-    const flecha = this.placeFigure('flecha', coordenadas.x, coordenadas.y, figureData.nodos[i].closest('.placed-figure'));
-
-
+    const flecha = this.placeFigure('flecha', coordenadas.x, coordenadas.y, figureData.nodos[i]);
     const evento = (e) => this.rotarFlecha( flecha, rect, e);
+    figureData.flechas.push(flecha);
     flecha.element.style.border = 'none';
     this.flechaSeleccionada.push(flecha);
     this.flechaSeleccionada.push(evento);
@@ -337,29 +336,45 @@ actualizarFlecha(flecha, nodo)
     flecha.style.top = Y1 + 'px';
 }
 
-actualizarTamañoFlecha(arrow, rect, e)
+actualizarTamañoFlecha(arrow, rectNodo1, e = null, rectNodo2 = null)
 {
-    const X1 = Math.round(rect.x + rect.width / 2);
-    const Y1 = Math.round(rect.y + rect.height / 2);
-    const X2 = Math.round(e.clientX);
-    const Y2 = Math.round(e.clientY);
+    const X1 = Math.round(rectNodo1.left + rectNodo1.width / 2);
+    const Y1 = Math.round(rectNodo1.top + rectNodo1.height / 2);
+    const X2 = e ? Math.round(e.clientX) : rectNodo2 ? Math.round(rectNodo2.left + rectNodo2.width / 2) : 0;
+    const Y2 = e ? Math.round(e.clientY) : rectNodo2 ? Math.round(rectNodo2.top + rectNodo2.height / 2) : 0;
 
     // Calcula la distancia entre los dos puntos
     const distance = Math.sqrt(Math.pow(X2 - X1, 2) + Math.pow(Y2 - Y1, 2))-5;
-    console.log(distance);
     arrow.shape.style.width = distance + 'px';
 
     arrow.width = distance;
 }
 
-rotarFlecha(arrow, rect, e)
+rotarFlecha( arrow, rectNodo1, e = null, rectNodo2 = null, origen = "left" )
 {
     const flecha = arrow.shape;
-    this.actualizarTamañoFlecha(arrow, rect, e);
-    const X1 = Math.round(rect.x + rect.width / 2);
-    const Y1 = Math.round(rect.y + rect.height / 2);
-    const X2 = Math.round(e.clientX);
-    const Y2 = Math.round(e.clientY);
+    flecha.style.transformOrigin = origen;
+    const X1 = Math.round(rectNodo1.x + rectNodo1.width / 2);
+    const Y1 = Math.round(rectNodo1.y + rectNodo1.height / 2);
+    const coordenadas = this.calcularCoordenadas(arrow.apuntadorA);
+    
+    arrow.element.style.left = (coordenadas.x*(this.zoom*this.gridSize)) + 'px';
+    arrow.element.style.top = (coordenadas.y*(this.zoom*this.gridSize)) + 'px';;
+    let X2 = 0;
+    let Y2 = 0;
+    if(e)
+    {
+        this.actualizarTamañoFlecha(arrow, rectNodo1, e,);
+        X2 = Math.round(e.clientX);
+        Y2 = Math.round(e.clientY);
+    }
+    else if (rectNodo2)
+    {
+        this.actualizarTamañoFlecha(arrow, rectNodo1, null, rectNodo2);
+        X2 = Math.round(rectNodo2.x + rectNodo2.width / 2);
+        Y2 = Math.round(rectNodo2.y + rectNodo2.height / 2);
+    }
+
 
     // Calcula el vector entre los dos puntos
     const vectorA = this.vector(X1, Y1, X2, Y2);
@@ -430,20 +445,20 @@ clickFigure(figure)
         {
             if (dataElement.element === figure)
                 {
-                    console.log("hola")
                     dataElement.nodos.forEach(nodo => nodo.style.visibility = "visible")
                 }
         });
 }
 
-clickNodo(figureData, i, e)
+clickNodo(figureData, i)
 {
-    console.log(this.flechaSeleccionada.length);
     if(this.flechaSeleccionada.length > 0)
     {
         const coodenadas = this.calcularCoordenadas(figureData.nodos[i]);
-        this.flechaSeleccionada.X2 = coodenadas.x;
-        this.flechaSeleccionada.Y2 = coodenadas.y;
+        this.flechaSeleccionada[0].X2 = coodenadas.x;
+        this.flechaSeleccionada[0].Y2 = coodenadas.y;
+        this.flechaSeleccionada[0].apuntadorE = figureData.nodos[i];
+        figureData.flechas.push(this.flechaSeleccionada[0]);
         this.container.removeEventListener('mousemove', this.flechaSeleccionada[1]);
         this.flechaSeleccionada.length = 0;
     }
@@ -458,42 +473,27 @@ handlePlacedFigureMouseDown(e) {
     // si es un boton devuelve <button id="bt"></button>
     //closest devuelve el primer ancestro que encuentre con la caracteristica dada
     //Es decir que va a buscar al primer padre que tenga la clase .placed-figure
-    if (e.target.closest('.placed-figure'))
+    const target = e.target.closest('.placed-figure');
+
+    if (target)
     {
         //si detecta que el objeto presionado es una figura entonces
         //quitas los eventos programados por defecto para poder agregar tu propia logica
         e.preventDefault();
+        this.placedFigures.forEach(figureData =>
+            {
+                if(figureData.element === target)
+                {
+                    this.draggedFigure = figureData;
+                    this.draggedFigure.element.classList.add('dragging');
+                    const figureRect = figureData.element.getBoundingClientRect();
+                    this.dragOffset = {
+                        x: e.clientX - figureRect.left,
+                        y: e.clientY - figureRect.top
+                    };
+                }
+            });
 
-        //Agrega la figura que se detecto que se esta cliqueando a la figura actual que esta siendo arrastrada
-        this.draggedFigure = e.target.closest('.placed-figure');
-        //agrega la clase dragging a la figura pra que se activen sus metodos css
-        this.draggedFigure.classList.add('dragging');
-
-        //guarda la posicion de la figura que tiene dentro del plano cartesiano
-        const rect = this.draggedFigure.getBoundingClientRect();
-        //Obtiene las coordenadas del plano cartesiano
-
-        //Crea un arreglo con la posicion de la figura cliqueada con respecto al plano cartesiano
-        this.dragOffset = {
-            //e.clientX devuelve la posicion horizontal relativa con respecto a toda la pantalla del mouse
-            //e.clientY devuelve la posicion vertical relativa con respecto a toda la pantalla del mouse
-
-            // e.clientX: posición horizontal del mouse relativa al viewport (ventana visible del navegador)
-            // rect.left: posición horizontal de la figura respecto al viewport
-            // rect.width / 2: mitad del ancho de la figura, para centrar el punto de arrastre en el centro del elemento
-
-            //A la posición del mouse le resta el valor left de rect que es la posicion de la figura en el plano cartesiano
-            //luego le resta el tamaño del ancho de rect dividido entre 2
-            x: e.clientX - rect.left ,
-
-            // e.clientY: posición vertical del mouse relativa al viewport
-            // rect.top: posición vertical de la figura respecto al viewport
-            // rect.height / 2: mitad del alto de la figura, para centrar el punto de arrastre en el centro del elemento
-
-            //A la posición del mouse le resta el valor top de rect que es la posicion de la figura en el plano cartesiano
-            //luego le resta el tamaño del alto de rect dividido entre 2
-            y: e.clientY - rect.top
-        };
     }
 }
 
@@ -525,11 +525,16 @@ movePlacedFigure(e)
         y = Math.max(0, y);
 
         //Mueven la figura a la posición de x y y
-        this.draggedFigure.style.left = (x * (this.gridSize * this.zoom)) + 'px';
-        this.draggedFigure.style.top = (y * (this.gridSize * this.zoom)) + 'px';
+        this.draggedFigure.element.style.left = (x * (this.gridSize * this.zoom)) + 'px';
+        this.draggedFigure.element.style.top = (y * (this.gridSize * this.zoom)) + 'px';
+
+        this.draggedFigure.flechas.forEach(flecha =>
+            {
+                this.rotarFlecha(flecha, flecha.apuntadorA.getBoundingClientRect(), null, flecha.apuntadorE.getBoundingClientRect());
+            });
 
         // Actualizar datos
-        const figureData = this.placedFigures.find(f => f.element === this.draggedFigure);
+        const figureData = this.placedFigures.find(f => f === this.draggedFigure);
         if (figureData)
             {
             figureData.x = x;
@@ -545,7 +550,7 @@ stopDragPlacedFigure()
     if (this.draggedFigure)
         {
         //Quita la clase dragging
-        this.draggedFigure.classList.remove('dragging');
+        this.draggedFigure.element.classList.remove('dragging');
         //Remueve la figura de figura arrastrada porque este ya no es así
         this.draggedFigure = null;
     }
@@ -564,7 +569,8 @@ getCanvasCoordinates(e)
     };
 }
 
-canvasToGrid(canvasX, canvasY) {
+canvasToGrid(canvasX, canvasY)
+{
     //gridSize es el tamaño de cada cuadro del plano cartesiano
     //zoom es la escala a la que se encuentra
     //canvasX es la posicion del puntero en la pantalla
@@ -574,9 +580,9 @@ canvasToGrid(canvasX, canvasY) {
     return { x: gridX, y: gridY };
 }
 
-draw() {
+draw()
+{
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
     // Fondo blanco
     this.ctx.fillStyle = '#fff';
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
