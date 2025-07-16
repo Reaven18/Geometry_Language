@@ -30,22 +30,22 @@
                     <li class="sidebar-element">
                         <div class="figures-panel" >
                             <div class="figures-grid">
-                            <div class="figure-item" data-shape="rectangle">
+                            <div class="figure-item" data-shape="proceso">
                                 <div class="figure-shape shape-rectangle"></div>
                             </div>
-                            <div class="figure-item" data-shape="cicle">
+                            <div class="figure-item" data-shape="ciclo">
                                 <div class="figure-shape shape-cicle"></div>
                             </div>
-                            <div class="figure-item" data-shape="rhombus">
+                            <div class="figure-item" data-shape="decision">
                                 <div class="figure-shape shape-rhombus"></div>
                             </div>
-                            <div class="figure-item" data-shape="pentagon">
+                            <div class="figure-item" data-shape="delimitador">
                                 <div class="figure-shape shape-pentagon"></div>
                             </div>
-                            <div class="figure-item" data-shape="circle">
+                            <div class="figure-item" data-shape="funcion">
                                 <div class="figure-shape shape-circle"></div>
                             </div>
-                            <div class="figure-item" data-shape="romboid">
+                            <div class="figure-item" data-shape="identificador">
                                 <div class="figure-shape shape-romboid"></div>
                             </div>
                             <div class="figure-item" data-shape="inicio">
@@ -54,7 +54,7 @@
                             <div class="figure-item" data-shape="fin">
                                 <div class="figure-shape shape-fin"></div>
                             </div>
-                            <div class="figure-item" data-shape="pause">
+                            <div class="figure-item" data-shape="pausa">
                                 <div class="figure-shape shape-pause"></div>
                             </div>
                         </div>
@@ -82,6 +82,9 @@
 </aside>
 <div class="main-container">
     <div class="controls">
+        <div class="control-group" style="margin-right: auto;">
+            <button onclick="capturarCodigo()">Iniciar</button>
+        </div>
             <div class="control-group">
                 <button onclick="zoomIn()">🔍 Zoom +</button>
                 <button onclick="zoomOut()">🔍 Zoom -</button>
@@ -100,6 +103,7 @@
             </div>
         </div>
         <script src="figuras.js"></script>
+
 </div>
 </body>
 </html>

@@ -107,52 +107,69 @@ createDragPreview(shapeType)
 
 createShapeElement(shapeType, size = 100) {
     const shape = document.createElement('div');
-
+    const textBox = document.createElement('p');
+    textBox.addEventListener('dblclick', () => {
+    textBox.focus();
+  });
+    shape.className = 'shape';
+    textBox.contentEditable = "true"
+    shape.appendChild(textBox);
     switch(shapeType) {
-        case 'rectangle':
+        case 'proceso':
             shape.classList.add('shape-rectangle');
             shape.style.width = (size * 1.2 ) + 'px';
             shape.style.height = (size * 0.8) + 'px';
+            textBox.textContent = "Proceso";
             break;
-        case 'rhombus':
+        case 'decision':
             shape.classList.add('shape-rhombus');
             shape.style.width = (size * 1.6) + 'px';
             shape.style.height = (size * 0.8) + 'px';
+            textBox.textContent = "Decisión";
             break;
-        case 'pentagon':
+        case 'delimitador':
             shape.classList.add('shape-pentagon');
-            shape.style.width = (size * 0.9) + 'px';
-            shape.style.height = (size * 0.9) + 'px';
+            shape.style.width = (size * 1.2) + 'px';
+            shape.style.height = (size * 1.2) + 'px';
+            textBox.textContent = "Función";
             break;
-        case 'circle':
+        case 'funcion':
             shape.classList.add('shape-circle');
             shape.style.width = (size * 1.2) + 'px';
             shape.style.height = (size * 1.2) + 'px';
+            textBox.textContent = "función";
             break;
-        case 'cicle':
+        case 'ciclo':
             shape.classList.add('shape-cicle');
             shape.style.width = (size * 0.8) + 'px';
             shape.style.height = (size) + 'px';
+            textBox.textContent = "Ciclo";
             break;
         case 'inicio':
             shape.classList.add('shape-inicio');
             shape.style.width = (size * 1.6 ) + 'px';
             shape.style.height = (size * 0.6) + 'px';
+            textBox.textContent = "Inicio";
+            textBox.contentEditable = "false";
             break;
         case 'fin':
             shape.classList.add('shape-fin');
             shape.style.width = (size * 1.6) + 'px';
             shape.style.height = (size * 0.6) + 'px';
+            textBox.textContent = "Fin";
+            textBox.contentEditable = "false";
             break;
-        case 'pause':
+        case 'pausa':
             shape.classList.add('shape-pause');
             shape.style.width = (size * 0.9) + 'px';
             shape.style.height = (size * 0.9) + 'px';
+            textBox.textContent = "tiempo";
             break;
-        case 'romboid':
+        case 'identificador':
             shape.classList.add('shape-romboid');
             shape.style.width = (size * 1.6) + 'px';
             shape.style.height = (size * 0.8) + 'px';
+            textBox.textContent = "Variables";
             break;
         case 'flecha':
             shape.classList.add('flecha');
@@ -357,7 +374,7 @@ rotarFlecha( arrow, rectNodo1, e = null, rectNodo2 = null, origen = "left" )
     const X1 = Math.round(rectNodo1.x + rectNodo1.width / 2);
     const Y1 = Math.round(rectNodo1.y + rectNodo1.height / 2);
     const coordenadas = this.calcularCoordenadas(arrow.apuntadorA);
-    
+
     arrow.element.style.left = (coordenadas.x*(this.zoom*this.gridSize)) + 'px';
     arrow.element.style.top = (coordenadas.y*(this.zoom*this.gridSize)) + 'px';;
     let X2 = 0;
@@ -455,6 +472,14 @@ clickNodo(figureData, i)
     if(this.flechaSeleccionada.length > 0)
     {
         const coodenadas = this.calcularCoordenadas(figureData.nodos[i]);
+        const figure = this.flechaSeleccionada[0].apuntadorA.closest('.placed-figure')
+        this.placedFigures.forEach(figureData2 =>
+        {
+            if(figureData2.element === figure)
+            {
+                figureData2.apuntadorE = figureData;
+            }
+        });
         this.flechaSeleccionada[0].X2 = coodenadas.x;
         this.flechaSeleccionada[0].Y2 = coodenadas.y;
         this.flechaSeleccionada[0].apuntadorE = figureData.nodos[i];
@@ -744,6 +769,37 @@ resetZoom() {
     this.updateFigurePositions();
     this.updateInfo();
 }
+
+capturarCodigo()
+{
+    let inicio = null;
+    this.placedFigures.forEach(figureData =>
+    {
+        if(figureData.shapeType == "inicio")
+        {
+            inicio = figureData;
+        }
+    });
+    this.capturarLinea(inicio);
+}
+
+capturarLinea(figureData)
+{
+    if(figureData.shapeType == "inicio" || figureData.shapeType == "fin")
+    {
+        console.log(figureData.shape.textContent);
+    }
+    else
+    {
+        console.log(`${figureData.shapeType}\n{\n   ${figureData.shape.textContent}\n}`)
+    }
+    if(figureData.apuntadorE)
+    {
+        this.capturarLinea(figureData.apuntadorE);
+    }
+}
+
+
 }
 
 
@@ -764,7 +820,7 @@ figureItems.forEach(item => {
 // Modificar la función para obtener el tipo de figura
 GridSheet.prototype.getShapeTypeFromPreview = function()
 {
-    return currentDragShape || 'rectangle';
+    return currentDragShape || 'proceso';
 };
 
 // Inicializar la hoja cuadriculada
@@ -799,4 +855,9 @@ function resetZoom()
 function clearFigures()
 {
     gridSheet.clearFigures();
+}
+
+function capturarCodigo()
+{
+    gridSheet.capturarCodigo();
 }
