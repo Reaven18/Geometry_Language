@@ -60,41 +60,41 @@ class AnalizadorSintactico {
         }
     }
 
-    programa() {
-    if (!this.coincidir(this.tokensTabla.INICIO)) {
+   programa() {
+        if (!this.coincidir(this.tokensTabla.INICIO)) {
         this.reportarError("Se esperaba 'inicio' al comienzo del programa");
         return null;
-    }
+        }
 
-    const cuerpo = [];
+        const cuerpo = [];
 
-    const decl = this.declaracion();
-    if (!decl) {
+        const decl = this.declaracion();
+        if (!decl) {
         this.reportarError("Falta declaración después de 'inicio'");
-    } else {
+        } else {
         cuerpo.push(decl);
-    }
+        }
 
-    const proc = this.proceso();
-    if (!proc) {
+        const proc = this.proceso();
+        if (!proc) {
         this.reportarError("Falta proceso después de declaración");
-    } else {
+        } else {
         cuerpo.push(proc);
-    }
+        }
 
-    const dec = this.decision();
-    if (!dec) {
-        this.reportarError("Falta decisión después del proceso");
-    } else {
-        cuerpo.push(dec);
-    }
+        // ✅ Ahora la decisión es opcional
+        if (this.token_actual && this.token_actual.tipo === this.tokensTabla.DECISION) {
+        const dec = this.decision();
+        if (dec) cuerpo.push(dec);
+        }   
 
-    if (!this.coincidir(this.tokensTabla.FIN)) {
+        if (!this.coincidir(this.tokensTabla.FIN)) {
         this.reportarError("Se esperaba 'fin' al final del programa");
+        }
+
+        return { tipo: 'Programa', cuerpo };
     }
 
-    return { tipo: 'Programa', cuerpo };
-}
 
 
     listaSentencias() {
