@@ -864,9 +864,10 @@ function capturarCodigo()
 
 function analizarPrograma() {
     const analizador = new AnalizadorSintactico();
-    const ordenadas = analizador.ordenarTokensPorFlechas(gridSheet.placedFigures);
 
+    const ordenadas = analizador.ordenarTokensPorFlechas(gridSheet.placedFigures);
     const tokens = [];
+
     let linea = 1;
 
     for (const fig of ordenadas) {
@@ -879,12 +880,19 @@ function analizarPrograma() {
                 tokens.push({ tipo: 3040, valor: 'fin', linea });
                 break;
             case 'rectangle':
+            case 'proceso':
                 tokens.push({ tipo: 1000, valor: 'avanzar', linea });
                 tokens.push({ tipo: 5000, valor: '(', linea });
                 tokens.push({ tipo: 5010, valor: ')', linea });
                 tokens.push({ tipo: 3020, valor: ';', linea });
                 break;
             case 'romboid':
+            case 'identificador':
+            case 'variables':
+                tokens.push({ tipo: 1170, valor: 'int', linea });
+                tokens.push({ tipo: 6000, valor: 'x', linea });
+                tokens.push({ tipo: 3020, valor: ';', linea });
+                break;
             case 'decision':
                 tokens.push({ tipo: 1060, valor: 'decision', linea });
                 tokens.push({ tipo: 5000, valor: '(', linea });
@@ -894,11 +902,6 @@ function analizarPrograma() {
                 break;
             case 'pause':
                 tokens.push({ tipo: 1220, valor: 'pausa', linea });
-                tokens.push({ tipo: 3020, valor: ';', linea });
-                break;
-            case 'variables':
-                tokens.push({ tipo: 1170, valor: 'int', linea });
-                tokens.push({ tipo: 6000, valor: 'x', linea });
                 tokens.push({ tipo: 3020, valor: ';', linea });
                 break;
             default:
@@ -914,9 +917,9 @@ function analizarPrograma() {
 
     if (resultado.exito) {
         alert("✅ Sintaxis válida");
-        console.log("AST generado:", resultado.arbol);
     } else {
-        alert("❌ Error de sintaxis:\n" + resultado.errores.join('\\n'));
-        console.error("Errores:", resultado.errores);
+        alert("❌ Error de sintaxis:\n" + resultado.errores.join("\n"));
     }
 }
+
+
