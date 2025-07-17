@@ -861,3 +861,65 @@ function capturarCodigo()
 {
     gridSheet.capturarCodigo();
 }
+
+function analizarPrograma() {
+    const analizador = new AnalizadorSintactico();
+
+    const ordenadas = analizador.ordenarTokensPorFlechas(gridSheet.placedFigures);
+    const tokens = [];
+
+    let linea = 1;
+
+    for (const fig of ordenadas) {
+        const tipo = fig.shapeType.toLowerCase();
+        switch (tipo) {
+            case 'inicio':
+                tokens.push({ tipo: 3030, valor: 'inicio', linea });
+                break;
+            case 'fin':
+                tokens.push({ tipo: 3040, valor: 'fin', linea });
+                break;
+            case 'rectangle':
+            case 'proceso':
+                tokens.push({ tipo: 1000, valor: 'avanzar', linea });
+                tokens.push({ tipo: 5000, valor: '(', linea });
+                tokens.push({ tipo: 5010, valor: ')', linea });
+                tokens.push({ tipo: 3020, valor: ';', linea });
+                break;
+            case 'romboid':
+            case 'identificador':
+            case 'variables':
+                tokens.push({ tipo: 1170, valor: 'int', linea });
+                tokens.push({ tipo: 6000, valor: 'x', linea });
+                tokens.push({ tipo: 3020, valor: ';', linea });
+                break;
+            case 'decision':
+                tokens.push({ tipo: 1060, valor: 'decision', linea });
+                tokens.push({ tipo: 5000, valor: '(', linea });
+                tokens.push({ tipo: 6000, valor: 'condicion', linea });
+                tokens.push({ tipo: 5010, valor: ')', linea });
+                tokens.push({ tipo: 3020, valor: ';', linea });
+                break;
+            case 'pause':
+                tokens.push({ tipo: 1220, valor: 'pausa', linea });
+                tokens.push({ tipo: 3020, valor: ';', linea });
+                break;
+            default:
+                tokens.push({ tipo: 6000, valor: tipo, linea });
+                tokens.push({ tipo: 3020, valor: ';', linea });
+        }
+
+        linea++;
+    }
+
+    analizador.cargarTokens(tokens);
+    const resultado = analizador.analizar();
+
+    if (resultado.exito) {
+        alert("✅ Sintaxis válida");
+    } else {
+        alert("❌ Error de sintaxis:\n" + resultado.errores.join("\n"));
+    }
+}
+
+
