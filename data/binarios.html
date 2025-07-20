@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <input type="file" id="csvFile" accept=".csv">
+<script>
+document.getElementById('csvFile').addEventListener('change', function(event) {
+  const archivo = event.target.files[0];
+  const lector = new FileReader();
+
+  lector.onload = function(e) {
+    const texto = e.target.result.trim();
+    const numeros = texto.split(',').map(Number);
+
+    const buffer = new ArrayBuffer(numeros.length * 2); // 2 bytes por número
+    const vista = new DataView(buffer);
+
+    numeros.forEach((num, i) => {
+      vista.setUint16(i * 2, num, true); // true = little endian
+    });
+
+    const blob = new Blob([buffer], { type: 'application/octet-stream' });
+
+    const enlace = document.createElement('a');
+    enlace.href = URL.createObjectURL(blob);
+    enlace.download = 'matriz.bin';
+    enlace.click();
+  };
+
+  lector.readAsText(archivo);
+});
+</script>
+
+</body>
+</html>

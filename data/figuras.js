@@ -17,6 +17,8 @@ sidebar.addEventListener('mouseleave', (e) =>
 class GridSheet {
 constructor(canvasId)
 {
+    this.codigo = "";
+
     //Obtines el canvas y su contexto
     this.canvas = document.getElementById(canvasId);
     this.ajustarCanvas();
@@ -149,14 +151,14 @@ createShapeElement(shapeType, size = 100) {
             shape.classList.add('shape-inicio');
             shape.style.width = (size * 1.6 ) + 'px';
             shape.style.height = (size * 0.6) + 'px';
-            textBox.textContent = "Inicio";
+            textBox.textContent = "inicio";
             textBox.contentEditable = "false";
             break;
         case 'fin':
             shape.classList.add('shape-fin');
             shape.style.width = (size * 1.6) + 'px';
             shape.style.height = (size * 0.6) + 'px';
-            textBox.textContent = "Fin";
+            textBox.textContent = "fin";
             textBox.contentEditable = "false";
             break;
         case 'pausa':
@@ -787,19 +789,203 @@ capturarLinea(figureData)
 {
     if(figureData.shapeType == "inicio" || figureData.shapeType == "fin")
     {
-        console.log(figureData.shape.textContent);
+        this.codigo += figureData.shape.textContent + "\n";
     }
     else
     {
-        console.log(`${figureData.shapeType}\n{\n   ${figureData.shape.textContent}\n}`)
+        this.codigo += `${figureData.shapeType}\n{\n   ${figureData.shape.textContent}\n}`;
     }
     if(figureData.apuntadorE)
     {
         this.capturarLinea(figureData.apuntadorE);
     }
 }
+analizadorLexico()
+{
+    let estados = null;
+    let matrizTransicion = null;
+    let filaActual = 0;
+    let columnaActual = 0;
+    let estadoActual = 0;
+    let filaSiguiente =  0;
+    let columnaSiguiente = 0;
+    let estadoSiguiente = 0;
+    let caracter = "";
+    let terminal = false;
+    let aux = 0;
+    let lexema = "";
+    const tamañofila = 97;
+    const estadosFinales = [[1000,'PALABRA_RESERVADA'],
+                            [1010,'PALABRA_RESERVADA'],
+                            [1020,'PALABRA_RESERVADA'],
+                            [1030,'PALABRA_RESERVADA'],
+                            [1040,'PALABRA_RESERVADA'],
+                            [1050,'PALABRA_RESERVADA'],
+                            [1060,'PALABRA_RESERVADA'],
+                            [1070,'PALABRA_RESERVADA'],
+                            [1080,'PALABRA_RESERVADA'],
+                            [1090,'PALABRA_RESERVADA'],
+                            [1100,'PALABRA_RESERVADA'],
+                            [1120,'PALABRA_RESERVADA'],
+                            [1130,'PALABRA_RESERVADA'],
+                            [1140,'PALABRA_RESERVADA'],
+                            [1153,'PALABRA_RESERVADA'],
+                            [1160,'PALABRA_RESERVADA'],
+                            [1170,'PALABRA_RESERVADA'],
+                            [1180,'PALABRA_RESERVADA'],
+                            [1190,'PALABRA_RESERVADA'],
+                            [1200,'PALABRA_RESERVADA'],
+                            [1210,'PALABRA_RESERVADA'],
+                            [1220,'PALABRA_RESERVADA'],
+                            [1230,'PALABRA_RESERVADA'],
+                            [1240,'PALABRA_RESERVADA'],
+                            [1250,'PALABRA_RESERVADA'],
+                            [2000,'OPERADOR_ARITMETICO'],
+                            [2010,'OPERADOR_ARITMETICO'],
+                            [2020,'OPERADOR_ARITMETICO'],
+                            [2030,'OPERADOR_ARITMETICO'],
+                            [2040,'OPERADOR_ARITMETICO'],
+                            [2050,'OPERADOR_ARITMETICO'],
+                            [2060,'OPERADOR_DE_ASIGNACIÓN'],
+                            [2070,'OPERADOR_RELACIONAL'],
+                            [2080,'OPERADOR_RELACIONAL'],
+                            [2090,'OPERADOR_RELACIONAL'],
+                            [2100,'OPERADOR_RELACIONAL'],
+                            [2110,'OPERADOR_RELACIONAL'],
+                            [2120,'OPERADOR_RELACIONAL'],
+                            [2130,'OPERADOR_LÓGICO'],
+                            [2140,'OPERADOR_LÓGICO'],
+                            [3000,'DELIMITADOR'],
+                            [3010,'BLANK_SPACE'],
+                            [3020,'DELIMITADOR'],
+                            [4000,'DELIMITADOR'],
+                            [4100,'DELIMITADOR'],
+                            [4200,'PALABRA_RESERVADA'],
+                            [4300,'PALABRA_RESERVADA'],
+                            [5000,'DELIMITADOR'],
+                            [5010,'DELIMITADOR'],
+                            [5020,'DELIMITADOR'],
+                            [5030,'DELIMITADOR'],
+                            [6000,'IDENTIFICADOR'],
+                            [7000,'NUMERO'],
+                            [9000,'CADENA_DE_CARACTERES']];
+    const alfabeto = 'abcdefghijklmnñopqrstuvwxyzABCDEFGHIJKLMNÑOPQRSTUVWXYZ0123456789<>=!|&{}[]()"\' ;,.+-*/%_$#°?¿¡\\´^';
 
+    function buscarCaracter(caracter)
+    {
+        for (let i = 0; i < alfabeto.length; i++)
+        {
+            if (alfabeto[i] === caracter)
+            {
+                return i;
+            }
+        }
+        return -1;
+    }
+    function buscarEstado()
+    {
+        for(let i = 0; i < estados.length; i++)
+        {
+            if(estados[i] === estadoActual)
+            {
+                return i;
+            }
+        }
+        return -1;
+    }
+    function buscarTerminal(estado)
+    {
+        for(let i = 0; i < estadosFinales.length; i++)
+        {
+            if(estadosFinales[i][0] === estado)
+            {
+                lexema = estadosFinales[i][1]
+                terminal = true;
+                break;
+            }
+        }
+    }
 
+    fetch('matriz.bin')
+    .then(res => res.arrayBuffer())
+    .then(buffer =>
+          {
+            matrizTransicion = new Uint16Array(buffer);
+
+            fetch('estados.bin')
+            .then(res2 => res2.arrayBuffer())
+            .then(buffer2 =>
+            {
+                estados = new Uint16Array(buffer2);
+                for(let i = 0; i < this.codigo.length; i++)
+                {
+                    if(this.codigo[i] === "\n"){continue;}
+                    caracter += this.codigo[i];
+                    filaActual = buscarEstado();
+                    columnaActual = buscarCaracter(this.codigo[i]);
+                    estadoActual = matrizTransicion[(tamañofila*filaActual)+columnaActual];
+                    filaSiguiente = buscarEstado();
+                    columnaSiguiente = buscarCaracter(this.codigo[i+1]);
+                    estadoSiguiente = matrizTransicion[(tamañofila*filaSiguiente)+columnaSiguiente];
+                    buscarTerminal(estadoActual);
+                    if(terminal)
+                    {
+                        if(estadoActual !== estadoSiguiente)
+                        {
+                            if(estadoActual < 3000 && estadoActual >= 2000)
+                            {
+                                aux++;
+                                if(estadoSiguiente < 3000 && estadoSiguiente >= 2000)
+                                {
+                                    aux++
+                                }
+                                if(aux === 1)
+                                {
+                                    console.log("TOKEN: " + lexema + " valor: " + caracter);
+                                    caracter = "";
+                                    estadoActual = 0;
+                                }
+                                else if(aux === 2)
+                                {
+                                    console.log("TOKEN: " + lexema + " valor: " + caracter);
+                                    caracter = "";
+                                    estadoActual = 0;
+                                    i++;
+                                }
+                                aux = 0;
+                            }
+                            else
+                            {
+                                console.log("TOKEN: " + lexema + " valor: " + caracter);
+                                caracter = "";
+                                estadoActual = 0;
+                            }
+                        }
+                    }
+                    else if(estadoActual === 999)
+                    {
+                        console.log("Carácter no permitido");
+                        break;
+                    }
+                    else
+                    {
+                        if(estadoActual < 2000)
+                        {
+                            if(estadoSiguiente == 0)
+                            {
+                                console.log("TOKEN: IDENTIFICADOR valor: " + caracter)
+                                caracter = "";
+                                estadoActual = 0;
+                            }
+                        }
+                    }
+                    terminal = false;
+                }
+            })
+            .catch()
+      })
+      .catch(err => console.error('Error:', err));
+}
 }
 
 
@@ -860,66 +1046,5 @@ function clearFigures()
 function capturarCodigo()
 {
     gridSheet.capturarCodigo();
+    gridSheet.analizadorLexico();
 }
-
-function analizarPrograma() {
-    const analizador = new AnalizadorSintactico();
-
-    const ordenadas = analizador.ordenarTokensPorFlechas(gridSheet.placedFigures);
-    const tokens = [];
-
-    let linea = 1;
-
-    for (const fig of ordenadas) {
-        const tipo = fig.shapeType.toLowerCase();
-        switch (tipo) {
-            case 'inicio':
-                tokens.push({ tipo: 3030, valor: 'inicio', linea });
-                break;
-            case 'fin':
-                tokens.push({ tipo: 3040, valor: 'fin', linea });
-                break;
-            case 'rectangle':
-            case 'proceso':
-                tokens.push({ tipo: 1000, valor: 'avanzar', linea });
-                tokens.push({ tipo: 5000, valor: '(', linea });
-                tokens.push({ tipo: 5010, valor: ')', linea });
-                tokens.push({ tipo: 3020, valor: ';', linea });
-                break;
-            case 'romboid':
-            case 'identificador':
-            case 'variables':
-                tokens.push({ tipo: 1170, valor: 'int', linea });
-                tokens.push({ tipo: 6000, valor: 'x', linea });
-                tokens.push({ tipo: 3020, valor: ';', linea });
-                break;
-            case 'decision':
-                tokens.push({ tipo: 1060, valor: 'decision', linea });
-                tokens.push({ tipo: 5000, valor: '(', linea });
-                tokens.push({ tipo: 6000, valor: 'condicion', linea });
-                tokens.push({ tipo: 5010, valor: ')', linea });
-                tokens.push({ tipo: 3020, valor: ';', linea });
-                break;
-            case 'pause':
-                tokens.push({ tipo: 1220, valor: 'pausa', linea });
-                tokens.push({ tipo: 3020, valor: ';', linea });
-                break;
-            default:
-                tokens.push({ tipo: 6000, valor: tipo, linea });
-                tokens.push({ tipo: 3020, valor: ';', linea });
-        }
-
-        linea++;
-    }
-
-    analizador.cargarTokens(tokens);
-    const resultado = analizador.analizar();
-
-    if (resultado.exito) {
-        alert("✅ Sintaxis válida");
-    } else {
-        alert("❌ Error de sintaxis:\n" + resultado.errores.join("\n"));
-    }
-}
-
-
